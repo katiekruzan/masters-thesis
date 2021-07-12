@@ -1,5 +1,6 @@
 """
 Here we're going to code for the local rotations. We're doing an object oriented approach
+Left and right are in referene to the center
 """
 
 __version__ = 1.0
@@ -119,6 +120,14 @@ class Inner:
         return True
 
 
+def findABuddy(collection, name):
+    for l in collection:
+        if l.getName == name:
+            return l
+    print('Buddy not found: ' + name)
+    return None
+
+
 def standardCircle(num_verts):
     """
     This will go through and initialize our standard circle
@@ -127,8 +136,27 @@ def standardCircle(num_verts):
     """
     segs = None
     outs = None
-    ins = None
+    inns = None
+
     for i in range(num_verts):
-        continue
-    string.ascii_letters
+        # For labeling, we will use the standard labeling for inner and outer, and then negative numbers, etc for
+        # the segments
+
+        # start inner
+        inn = Inner(string.ascii_letters[i])
+        if i != 0:
+            continue
+
+        # then make the outer
+        out = Outer(str(i))
+        out.setAdjInner(inn)
+        inn.setAdjOuter(out)
+        if i != 0:
+            continue
+
+        # then make the segment
+        seg = Segment(str(-i))
+        seg.setLeftOuter(out)
+        out.setRightSegment(seg)
+
     return
