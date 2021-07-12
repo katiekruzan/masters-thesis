@@ -120,12 +120,12 @@ class Inner:
         return True
 
 
-def findABuddy(collection, name):
-    for l in collection:
-        if l.getName == name:
-            return l
-    print('Buddy not found: ' + name)
-    return None
+# def findABuddy(collection, name):
+#     for l in collection:
+#         if l.getName == name:
+#             return l
+#     print('Buddy not found: ' + name)
+#     return None
 
 
 def standardCircle(num_verts):
@@ -134,9 +134,9 @@ def standardCircle(num_verts):
     :param num_verts:
     :return:
     """
-    segs = None
-    outs = None
-    inns = None
+    segs = dict()
+    outs = dict()
+    inns = dict()
 
     for i in range(num_verts):
         # For labeling, we will use the standard labeling for inner and outer, and then negative numbers, etc for
@@ -145,6 +145,13 @@ def standardCircle(num_verts):
         # start inner
         inn = Inner(string.ascii_letters[i])
         if i != 0:
+            inn.setLeftInner(inns[string.ascii_letters[i-1]])
+            inns[string.ascii_letters[i - 1]].setRightInner(inn)
+            if inns[string.ascii_letters[i - 1]].getRightInner() == inn:
+                print('Successfully set in the dictionary')
+            if i == num_verts-1:  # time to close up the circle
+                inn.setRightInner(inns[string.ascii_letters[0]])
+                inns[string.ascii_letters[0]].setLeftInner(inn)
             continue
 
         # then make the outer
@@ -158,5 +165,10 @@ def standardCircle(num_verts):
         seg = Segment(str(-i))
         seg.setLeftOuter(out)
         out.setRightSegment(seg)
+
+        # add them to our dictionaries
+        segs[seg.getName()] = seg
+        outs[out.getName()] = out
+        inns[inn.getName()] = inn
 
     return
