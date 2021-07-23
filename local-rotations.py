@@ -7,6 +7,7 @@ __version__ = 1.0
 __author__ = 'Katie Kruzan'
 
 import string  # just to get the alphabet easily itterable
+import sys
 
 
 # Getting the structure for the classes we're putting together
@@ -168,8 +169,6 @@ def standardCircle(num_verts):
         inn = Inner(string.ascii_letters[i])
         if i != 0:
             inn.setLeftInner(inns[string.ascii_letters[i-1]])
-            if inns[string.ascii_letters[i - 1]].getRightInner() == inn:
-                print('Successfully set in the dictionary')
             if i == num_verts-1:  # time to close up the circle
                 inn.setRightInner(inns[string.ascii_letters[0]])
 
@@ -178,10 +177,8 @@ def standardCircle(num_verts):
         out.setAdjInner(inn)
         if i != 0:
             out.setLeftSegment(segs[str(-i)])
-            if segs[str(-i)].getRightOuter() == out:
-                print('Successfully set in the dictionary')
-            if i == num_verts - 1:  # time to close up the circle
-                out.setLeftSegment(segs[str(-1)])
+            # if i == num_verts - 1:  # time to close up the circle
+            #     out.setLeftSegment(segs[str(-1)])
 
         # then make the segment
         seg = Segment(str(-i-1))
@@ -197,8 +194,95 @@ def standardCircle(num_verts):
     return segs, outs, inns
 
 
-if __name__ == '__main__':
-    s, o, i = standardCircle(3)
+def findTheFace(source_inner):
+    # order will be i, o, s, o, i repeat
+    face = []
+    source_in = source_inner
+    face.append(source_in)
+    end_in = None
+    while source_in != end_in:
+        # inner: find adjacent outer
+        face.append(face[-1].getAdjOuter())
+        # outer: go to right seg
+        face.append(face[-1].getRightSegment())
+        # segment: go to right outer
+        face.append(face[-1].getRightOuter())
+        # outer: then adj inner
+        face.append(face[-1].getAdjInner())
+        # then left inner and repeat.
+        end_in = face[-1].getLeftInner()
+        face.append(end_in)
+    return face
 
-    
+
+def grabAllTheFaces(inns):
+    # do this based on the inner verts
+    faces = []
+    covered = set()
+    for inn in inns:
+        # check if we already have it in a face
+        if inns[inn] not in covered:
+            face = findTheFace(inns[inn])
+            faces.append(face)
+            covered.update(face)
+
+    # check we've gotten all the elements
+    if len(covered) == (3*len(inns)):
+        print('We got em!!!')
+
+    return faces
+
+
+def printCircleStatus(segs, outs, inns):
+    print('\nSegments:')
+    for k in segs:
+        print()
+        print(k)
+        print(segs[k].toString())
+
+    print('\nOuters:')
+    for k in outs:
+        print()
+        print(k)
+        print(outs[k].toString())
+
+    print('\nInners:')
+    for k in inns:
+        print()
+        print(k)
+        print(inns[k].toString())
+
+
+if __name__ == '__main__':
+    segments, outers, inners = standardCircle(3)
+    printCircleStatus(segments, outers, inners)
+    print(inners['a'].getName())
+
+    facs = grabAllTheFaces(inners)
+    # run through the inner verticies. But check if they are already in our faces
+    print('\nPrinting the faces')
+    for f in facs:
+        print()
+        for p in f:
+            sys.stdout.write(p.getName() + ' ')
+
+    switch = '23'
+    for num in range(len(switch)):
+        cs = switch[num]
+        ns = switch[0]
+        if num != (len(switch)-1):
+            ns = switch[num+1]
+        inners[string.ascii_letters[int(cs)-1]].setAdjOuter(outers[ns])
+        outers[ns].setAdjInner(inners[string.ascii_letters[int(cs) - 1]])
+
+    printCircleStatus(segments, outers, inners)
+
+    new_facs = grabAllTheFaces(inners)
+    print('\nPrinting the faces')
+    for f in new_facs:
+        print()
+        for p in f:
+            sys.stdout.write(p.getName() + ' ')
+
+
 
