@@ -19,31 +19,32 @@ class Segment:
         self.rightOuter = None
         self.name = name
 
-    # TODO: Force object types in the init
-    # def __setattr__(self, name, value):
-    #     if name in ['leftOuter', 'rightOuter'] and not isinstance(value, Outer):
-    #         raise TypeError('Segment.leftOuter must be an Outer object')
-    #     super().__setattr__(name, value)
-
     def getName(self):
         return self.name
 
-    def getLeftVertex(self):
-        return self.leftVertex
+    def getLeftOuter(self):
+        return self.leftOuter
 
-    def getRightVertex(self):
-        return self.rightVertex
+    def getRightOuter(self):
+        return self.rightOuter
 
     def setLeftOuter(self, left):
         self.leftOuter = left
+        if left.getRightSegment() is None:
+            left.setRightSegment(self)
 
     def setRightOuter(self, right):
         self.rightOuter = right
+        if right.getLeftSegment() is None:
+            right.setLeftSegment(self)
 
     def isValidObject(self):
         if (self.leftOuter is None) or (self.rightOuter is None):
             return False
         return True
+
+    def toString(self):
+        return 'left Outer: ' + self.leftOuter.getName() + '\nright Outer: ' + self.rightOuter.getName()
 
 
 class Outer:
@@ -69,18 +70,29 @@ class Outer:
         return self.adjInner
 
     def setLeftSegment(self, left):
+        # this is a segment
         self.leftSegment = left
+        if left.getRightOuter() is None:
+            left.setRightOuter(self)
 
     def setRightSegment(self, right):
         self.rightSegment = right
+        if right.getLeftOuter() is None:
+            right.setLeftOuter(self)
 
     def setAdjInner(self, inner):
         self.adjInner = inner
+        if inner.getAdjOuter() is None:
+            inner.setAdjOuter(self)
 
     def isValidObject(self):
         if (self.leftSegment is None) or (self.rightSegment is None) or (self.adjInner is None):
             return False
         return True
+
+    def toString(self):
+        return 'left Segment: ' + self.leftSegment.getName() + '\nright Segment: ' + self.rightSegment.getName() \
+               + '\nadj Inner: ' + self.adjInner.getName()
 
 
 class Inner:
@@ -107,17 +119,27 @@ class Inner:
 
     def setLeftInner(self, left):
         self.leftInner = left
+        if left.getRightInner() is None:
+            left.setRightInner(self)
 
     def setRightInner(self, right):
         self.rightInner = right
+        if right.getLeftInner() is None:
+            right.setLeftInner(self)
 
     def setAdjOuter(self, outer):
         self.adjOuter = outer
+        if outer.getAdjInner() is None:
+            outer.setAdjInner(self)
 
     def isValidObject(self):
         if (self.leftInner is None) or (self.rightInner is None) or (self.adjOuter is None):
             return False
         return True
+
+    def toString(self):
+        return 'left Inner: ' + self.leftInner.getName() + '\nright Inner: ' + self.rightInner.getName() \
+               + '\nadj Outer: ' + self.adjOuter.getName()
 
 
 # def findABuddy(collection, name):
@@ -146,29 +168,37 @@ def standardCircle(num_verts):
         inn = Inner(string.ascii_letters[i])
         if i != 0:
             inn.setLeftInner(inns[string.ascii_letters[i-1]])
-            inns[string.ascii_letters[i - 1]].setRightInner(inn)
             if inns[string.ascii_letters[i - 1]].getRightInner() == inn:
                 print('Successfully set in the dictionary')
             if i == num_verts-1:  # time to close up the circle
                 inn.setRightInner(inns[string.ascii_letters[0]])
-                inns[string.ascii_letters[0]].setLeftInner(inn)
-            continue
 
         # then make the outer
-        out = Outer(str(i))
+        out = Outer(str(i+1))
         out.setAdjInner(inn)
-        inn.setAdjOuter(out)
         if i != 0:
-            continue
+            out.setLeftSegment(segs[str(-i)])
+            if segs[str(-i)].getRightOuter() == out:
+                print('Successfully set in the dictionary')
+            if i == num_verts - 1:  # time to close up the circle
+                out.setLeftSegment(segs[str(-1)])
 
         # then make the segment
-        seg = Segment(str(-i))
+        seg = Segment(str(-i-1))
         seg.setLeftOuter(out)
-        out.setRightSegment(seg)
+        if i == num_verts - 1:  # time to close up the circle
+            seg.setRightOuter(outs[str(1)])
 
         # add them to our dictionaries
         segs[seg.getName()] = seg
         outs[out.getName()] = out
         inns[inn.getName()] = inn
 
-    return
+    return segs, outs, inns
+
+
+if __name__ == '__main__':
+    s, o, i = standardCircle(3)
+
+    
+
