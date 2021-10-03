@@ -8,6 +8,7 @@ __author__ = 'Katie Kruzan'
 
 import string  # just to get the alphabet easily iterable
 import sys  # This just helps us in our printing
+from typing import Dict # This helps us in our documentation
 
 
 # Getting the structure for the classes we're putting together
@@ -279,7 +280,7 @@ class Inner:
                + '\nadj Outer: ' + self.adjOuter.getName()
 
 
-def standardCircle(num_verts: int):
+def standardCircle(num_verts: int) -> (Dict[str, Segment], Dict[str, Outer], Dict[str, Inner]):
     """
     This will go through and initialize our standard starting circle
     :param num_verts: the number of outer nodes we will have
@@ -396,41 +397,64 @@ def faceCannonOrder(face: list) -> list:
             ord_face.pop(i)
             break
 
+    # return the ordered face
     return ord_face
 
 
-def grabAllTheFaces(inns):
-    # do this based on the inner verts
-    faces = []
+def grabAllTheFaces(inns: Dict[str, Inner]) -> list:
+    """
+    Function to get the list of unique faces for our circle.
+    :param inns: dictionary of Inner objects. We will loop through these to get the faces
+    :return: faces: List of distinct faces in canonical order.
+    """
+    # initialize the list of faces
+    faces = list()
+    # a set of all the elements we have covered by the faces. Will use this for a completeness check
     covered = set()
+    # run through every inner node we've been given
     for inn in inns:
-        # check if we already have it in a face
+        # Generate the face that inner node lies on
         face = findTheFace(inns[inn])
+        # put the face we've gotten in canonical order
         face = faceCannonOrder(face)
+        # Check if we've already captured it.
         if face not in faces:
+            # If not, then add it to our list of faces
             faces.append(face)
-        covered.update(face)
+            # Go ahead and add the elements in this face to our covered set
+            covered.update(face)
 
     # check we've gotten all the elements
     if len(covered) == (3 * len(inns)):
         print('We got em!!!')
 
+    # Now return a list of all the faces we have.
     return faces
 
 
-def printCircleStatus(segs, outs, inns):
+def printCircleStatus(segs: Dict[str, Segment], outs: Dict[str, Outer], inns: Dict[str, Inner]):
+    """
+    Helper function that prints the status of the circle to the console
+    :param segs: dictionary of str: Segment objects in the circle
+    :param outs: dictionary of str: Outer objects in the circle
+    :param inns: dictionary of str: Inner objects in the circle
+    :return: None
+    """
+    # Run through the segments
     print('\nSegments:')
     for k in segs:
         print()
         print(k)
         print(segs[k].toString())
 
+    # Run through the Outer nodes
     print('\nOuters:')
     for k in outs:
         print()
         print(k)
         print(outs[k].toString())
 
+    # Run through the Inner nodes
     print('\nInners:')
     for k in inns:
         print()
@@ -440,32 +464,36 @@ def printCircleStatus(segs, outs, inns):
 
 if __name__ == '__main__':
     # TODO: make available for double digits and multiple cycles
+    # This is where you change the variables.
     verts = 9
     switch = '25483769'
 
+    # Go ahead and make the standard circle given the number of vertices we want to use.
     segments, outers, inners = standardCircle(verts)
-    # printCircleStatus(segments, outers, inners)
-    # print(inners['a'].getName())
 
+    # Go through and grab the faces for our standard circle
     facs = grabAllTheFaces(inners)
-    # run through the inner verticies. But check if they are already in our faces
     print('\nPrinting the faces')
     for f in facs:
         print()
         for p in f:
             sys.stdout.write(p.getName() + ' ')
 
+    # Go through and do the switches
     for num in range(len(switch)):
+        # store the current part of the switch we're working on
         cs = switch[num]
-        ns = switch[0]
-        # do the looping (could also do this with mod, but why do that when we can make it hard!
-        if num != (len(switch) - 1):
-            ns = switch[num + 1]
+        # store the next part of the switch we're working on, looping to the beginning if we're at the end
+        ns = switch[(num + 1) % len(switch)]
+        # Do the actual switch
+        # Getting the new inner and outer validly switched up
         inners[string.ascii_letters[int(cs) - 1]].setAdjOuter(outers[ns])
         outers[ns].setAdjInner(inners[string.ascii_letters[int(cs) - 1]])
 
+    # print how the final rotation sits
     printCircleStatus(segments, outers, inners)
 
+    # Go through and generate and print the new faces
     new_facs = grabAllTheFaces(inners)
     print('\nPrinting the new faces')
     for f in new_facs:
