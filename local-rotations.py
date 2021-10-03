@@ -7,7 +7,7 @@ __version__ = 1.0
 __author__ = 'Katie Kruzan'
 
 import string  # just to get the alphabet easily iterable
-import sys
+import sys  # This just helps us in our printing
 
 
 # Getting the structure for the classes we're putting together
@@ -16,7 +16,7 @@ class Segment:
     These are going to represent the outer segments and the mysteries they hold
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         """
         Initialize the segment, keeping a place for the right left outer vertices to which it is adjacent
         :param name: How we will reference this segment. In this implementation, it is expected to be a negative number
@@ -25,31 +25,63 @@ class Segment:
         self.rightOuter = None
         self.name = name
 
-    def getName(self):
+    def getName(self) -> str:
+        """
+        Return the name we gave to this segment.
+        :return: name
+        """
         return self.name
 
     def getLeftOuter(self):
+        """
+        Return the outer node to the left of this segment with respect to the origin
+        :return: leftOuter
+        """
         return self.leftOuter
 
     def getRightOuter(self):
+        """
+        Return the outer node to the right of this segment with respect to the origin
+        :return: rightOuter
+        """
         return self.rightOuter
 
     def setLeftOuter(self, left):
+        """
+        Set the outer node to the left of this segment with respect to the origin
+        Also, set left's right segment to this segment.
+        :param left: A outer node object to be referenced as this node's left outer node
+        :return: None
+        """
         self.leftOuter = left
         if left.getRightSegment() is None:
             left.setRightSegment(self)
 
     def setRightOuter(self, right):
+        """
+        Set the outer node to the right of this segment with respect to the origin
+        Also, set right's left segment to this segment.
+        :param right: A outer node object to be referenced as this node's right outer node
+        :return: None
+        """
         self.rightOuter = right
         if right.getLeftSegment() is None:
             right.setLeftSegment(self)
 
-    def isValidObject(self):
+    def isValidObject(self) -> bool:
+        """
+        Checks to see if this segment has been full initialized.
+        :return: valid returns true if it has both the left and right outer nodes set
+        """
         if (self.leftOuter is None) or (self.rightOuter is None):
             return False
         return True
 
-    def toString(self):
+    def toString(self) -> str:
+        """
+        
+        :return:
+        """
         return 'left Outer: ' + self.leftOuter.getName() + '\nright Outer: ' + self.rightOuter.getName()
 
 
@@ -246,7 +278,6 @@ def grabAllTheFaces(inns):
     covered = set()
     for inn in inns:
         # check if we already have it in a face
-        # if inns[inn] not in covered:
         face = findTheFace(inns[inn])
         face = faceCannonOrder(face)
         if face not in faces:
@@ -282,8 +313,8 @@ def printCircleStatus(segs, outs, inns):
 
 if __name__ == '__main__':
     # TODO: make available for double digits and multiple cycles
-    verts = 6
-    switch = '2436'
+    verts = 9
+    switch = '25483769'
 
     segments, outers, inners = standardCircle(verts)
     # printCircleStatus(segments, outers, inners)
@@ -300,6 +331,7 @@ if __name__ == '__main__':
     for num in range(len(switch)):
         cs = switch[num]
         ns = switch[0]
+        # do the looping (could also do this with mod, but why do that when we can make it hard!
         if num != (len(switch) - 1):
             ns = switch[num + 1]
         inners[string.ascii_letters[int(cs) - 1]].setAdjOuter(outers[ns])
