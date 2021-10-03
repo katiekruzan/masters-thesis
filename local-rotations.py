@@ -1,6 +1,6 @@
 """
 Here we're going to code for the local rotations. We're doing an object oriented approach
-Left and right are in referene to the center
+Left and right are in reference to the origin
 """
 
 __version__ = 1.0
@@ -8,7 +8,7 @@ __author__ = 'Katie Kruzan'
 
 import string  # just to get the alphabet easily iterable
 import sys  # This just helps us in our printing
-from typing import Dict # This helps us in our documentation
+from typing import Dict  # This helps us in our documentation
 
 
 # Getting the structure for the classes we're putting together
@@ -463,10 +463,21 @@ def printCircleStatus(segs: Dict[str, Segment], outs: Dict[str, Outer], inns: Di
 
 
 if __name__ == '__main__':
-    # TODO: make available for double digits and multiple cycles
     # This is where you change the variables.
-    verts = 9
-    switch = '25483769'
+    # must be a positive integer > 2
+    verts = 12
+    # Must be a string with spaces between each element. If you want to denote multiple cycles, you must add a |
+    switch_txt = '2 3 4 5 | 12 7'
+
+    # we're going to make a list of all the switches and all the cycles
+    switches = list()
+    # first, we get the cycles, split by '|'
+    cycles = switch_txt.split('|')
+    for c in cycles:
+        # We're going to split the switch into a list split by the whitespace
+        s = c.strip().split()
+        # Then we're going to append the switches in the cycle to the new list
+        switches.append(s)
 
     # Go ahead and make the standard circle given the number of vertices we want to use.
     segments, outers, inners = standardCircle(verts)
@@ -479,16 +490,17 @@ if __name__ == '__main__':
         for p in f:
             sys.stdout.write(p.getName() + ' ')
 
-    # Go through and do the switches
-    for num in range(len(switch)):
-        # store the current part of the switch we're working on
-        cs = switch[num]
-        # store the next part of the switch we're working on, looping to the beginning if we're at the end
-        ns = switch[(num + 1) % len(switch)]
-        # Do the actual switch
-        # Getting the new inner and outer validly switched up
-        inners[string.ascii_letters[int(cs) - 1]].setAdjOuter(outers[ns])
-        outers[ns].setAdjInner(inners[string.ascii_letters[int(cs) - 1]])
+    # Go through and do the switches for each cycle
+    for switch in switches:
+        for num in range(len(switch)):
+            # store the current part of the switch we're working on
+            cs = switch[num]
+            # store the next part of the switch we're working on, looping to the beginning if we're at the end
+            ns = switch[(num + 1) % len(switch)]
+            # Do the actual switch
+            # Getting the new inner and outer validly switched up
+            inners[string.ascii_letters[int(cs) - 1]].setAdjOuter(outers[ns])
+            outers[ns].setAdjInner(inners[string.ascii_letters[int(cs) - 1]])
 
     # print how the final rotation sits
     printCircleStatus(segments, outers, inners)
